@@ -1,0 +1,52 @@
+server:
+  port: 8765
+spring:
+  application:
+    name: zuul-server
+#springboot admin service
+  boot:
+    admin:
+      client:
+        url: "http://localhost:8000"
+        username: root
+        password: root
+        instance:
+          prefer-ip: true
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${server.port} # 修改显示的微服务名为：服务名:端口
+    prefer-ip-address: true                       # 设置微服务调用地址为IP优先（缺省为false）
+    lease-renewal-interval-in-seconds: 5          # 心跳时间，即服务续约间隔时间（缺省为30s）
+    lease-expiration-duration-in-seconds: 15      # 发呆时间，即服务续约到期时间（缺省为90s）
+    health-check-url-path: /actuator/health
+  client:
+    registryFetchIntervalSeconds: 5
+    healthcheck:
+      enabled: true                               # 开启健康检查（依赖spring-boot-starter-actuator）
+    serviceUrl:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8762/eureka/,http://peer3:8763/eureka/
+
+
+# 路由
+zuul:
+  routes:
+    feign:
+      path: /feign/**
+      serviceId: feign-server
+    producer:
+      path: /producer/**
+      serviceId: producer-server
+  #服务重试
+  retryable: true
+
+
+#springboot admin service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

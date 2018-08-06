@@ -1,0 +1,65 @@
+server:
+  port: 8766
+spring:
+  application:
+    name: turbine-server
+  #springboot admin service
+  boot:
+    admin:
+      client:
+        url: "http://localhost:8000"
+        username: root
+        password: root
+        instance:
+          prefer-ip: true
+
+
+#  client:
+#    serviceUrl:
+#      defaultZone: http://peer1:8761/eureka/,http://peer2:8769/eureka/
+#      #开启健康检查（需要spring-boot-starter-actuator依赖）
+#      #更改Eureka更新频率将打破服务器的自我保护功能，生产环境下不建议自定义这些配置
+#    healthcheck:
+#      enabled: true
+#    instance:
+#        lease-expiration-duration-in-seconds: 30 #续约更新时间间隔（默认30秒）
+#        lease-renewal-interval-in-seconds: 10 #续约到期时间（默认90秒）
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${server.port} # 修改显示的微服务名为：服务名:端口
+    prefer-ip-address: true                       # 设置微服务调用地址为IP优先（缺省为false）
+    lease-renewal-interval-in-seconds: 5          # 心跳时间，即服务续约间隔时间（缺省为30s）
+    lease-expiration-duration-in-seconds: 15      # 发呆时间，即服务续约到期时间（缺省为90s）
+    health-check-url-path: /actuator/health
+    metadata-map:
+      management.port: 8767
+  client:
+    registryFetchIntervalSeconds: 5
+    healthcheck:
+      enabled: true                               # 开启健康检查（依赖spring-boot-starter-actuator）
+    serviceUrl:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8762/eureka/,http://peer3:8763/eureka/
+
+turbine:
+  app-config: feign-server,producer-server,service-config,admin-server
+  aggregator:
+    clusterConfig: default
+  cluster-name-expression: new String("default")
+  combine-host-port: true
+  instanceUrlSuffix:
+    default: actuator/hystrix.stream #actuator/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      cors:
+          allowed-origins: "*"
+          allowed-methods: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+
+

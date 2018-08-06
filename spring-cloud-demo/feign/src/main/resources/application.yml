@@ -1,0 +1,51 @@
+server:
+  port: 8764
+spring:
+  application:
+    name: feign-server
+#springboot admin service
+  boot:
+    admin:
+      client:
+        url: "http://localhost:8000"
+        username: root
+        password: root
+        instance:
+          prefer-ip: true
+#指定zipkin server的地址
+  zipkin:
+    base-url: http://localhost:9411
+  sleuth:
+  #监控开关
+    enabled: true
+  #采样率
+    sampler:
+      percentage: 1.0
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5      # 心跳时间，即服务续约间隔时间（缺省为30s）
+    lease-expiration-duration-in-seconds: 15  # 发呆时间，即服务续约到期时间（缺省为90s）
+    health-check-url-path: /actuator/health
+  client:
+    registry-fetch-interval-seconds: 10
+    healthcheck:
+      enabled: true
+    serviceUrl:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8762/eureka/,http://peer3:8763/eureka/
+
+#To disable Hystrix in Feign
+feign:
+  hystrix:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

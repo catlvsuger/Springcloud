@@ -1,0 +1,79 @@
+server:
+  port: 8000
+spring:
+  application:
+    name: admin-server
+#  mail:
+#    host: smtp.qq.com
+#    username: xxx@qq.com
+#    password: xxx
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
+#            required: true
+#  boot:
+#    admin:
+#      notify:
+#        mail:
+#          from: xxx@qq.com
+#          to: xxxx@qq.com
+# http://codecentric.github.io/spring-boot-admin/1.5.6/#mail-notifications
+
+
+
+#定义各种额外的详情给服务端显示
+#从pom.xml中获取
+info:
+  app:
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+  spring-boot-version: "@project.parent.version@"
+  version: "@project.version@"
+
+spring:
+  profiles:
+    active: secure
+
+#---
+#spring:
+#  profiles: insecure
+#---
+
+# admin登录的用户名和密码
+spring:
+  profiles: secure
+  security:
+    user:
+      name: "root"
+      password: "root"
+
+
+# tag::configuration-eureka[]
+# 注册给eureka的时候告诉eureka自己的密码
+eureka:
+  instance:
+    leaseRenewalIntervalInSeconds: 10
+    health-check-url-path: /actuator/health #2.0后actuator的地址发生了变化
+    metadata-map:
+      "user.name": ${spring.security.user.name}         #These two are needed so that the server
+      "user.password": ${spring.security.user.password} #can access the protected client endpoints
+  client:
+    registryFetchIntervalSeconds: 5
+    serviceUrl:
+      defaultZone: http://peer1:8761/eureka/,http://peer2:8769/eureka/
+
+# 2.0开始，actuator默认不开放，所以要设置为开放
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  #<2>
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+# end::configuration-eureka[]
